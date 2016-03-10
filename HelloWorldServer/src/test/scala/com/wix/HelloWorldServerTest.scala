@@ -48,11 +48,15 @@ class HelloWorldServerTest extends SpecificationWithJUnit {
     import system.dispatcher
 
     def setUpServer(maybeTimeTeller: Option[TimeTeller] = None) = {
-      lazy val helloWorldHttpServiceActor =
-        system.actorOf(Props(
+
+      def getServerActor: Props = {
+        Props(
           maybeTimeTeller.fold
           (new HelloWorldHttpServiceActor())
-          (timeTeller => new HelloWorldHttpServiceActor(timeTeller))))
+          (timeTeller => new HelloWorldHttpServiceActor(timeTeller)))
+      }
+
+      val helloWorldHttpServiceActor = system.actorOf(getServerActor, name = "handler")
 
       startServer(interface = "localhost", port = port) {
         { ctx => helloWorldHttpServiceActor ! ctx }
